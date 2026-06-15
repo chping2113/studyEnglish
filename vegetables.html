@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>蔬菜园 🥕 - 小小英语乐园</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="scene-page vegetables-page">
+  <nav class="top-nav">
+    <a href="index.html" class="back-btn" aria-label="返回首页">← 返回</a>
+    <h1 class="scene-title">🥕 快乐蔬菜园</h1>
+    <span class="item-count">共 <strong id="itemCount">0</strong> 种 · 当前 <strong id="visibleCount">0</strong> 种</span>
+  </nav>
+  <div class="zone-tabs" id="zoneTabs"></div>
+  <div class="learning-scene vegetables-scene">
+    <div class="scene-sky veg-sky">
+      <div class="cloud cloud-1"></div>
+      <div class="sun"></div>
+    </div>
+    <div class="scene-sign veg-sign"><span>VEGGIE</span><small>蔬菜园</small></div>
+    <div class="scene-ground veg-ground">
+      <div class="veg-patch patch-1">🌱</div>
+      <div class="veg-patch patch-2">🌿</div>
+      <div class="veg-fence">🪵</div>
+    </div>
+    <div class="items-container" id="itemsContainer"></div>
+  </div>
+  <div class="item-modal" id="itemModal" aria-hidden="true">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-layout">
+      <button class="modal-nav modal-prev" id="modalPrev" aria-label="上一个" type="button">◀</button>
+      <div class="modal-content" role="dialog">
+        <button class="modal-close" id="modalClose" aria-label="关闭" type="button">✕</button>
+        <p class="modal-index" id="modalIndex"></p>
+        <div class="modal-item-icon" id="modalIcon"></div>
+        <h2 class="modal-english" id="modalEnglish"></h2>
+        <p class="modal-chinese" id="modalChinese"></p>
+        <div class="modal-sentence">
+          <p class="sentence-en" id="modalSentenceEn"></p>
+          <p class="sentence-zh" id="modalSentenceZh"></p>
+        </div>
+        <button class="replay-btn" id="replayBtn" type="button">🔊 再读一遍</button>
+      </div>
+      <button class="modal-nav modal-next" id="modalNext" aria-label="下一个" type="button">▶</button>
+    </div>
+  </div>
+  <p class="hint">👆 点击蔬菜学单词，卡片内可前后切换</p>
+  <script src="js/speech.js"></script>
+  <script src="js/scene.js"></script>
+  <script src="js/vegetables.js"></script>
+</body>
+</html>

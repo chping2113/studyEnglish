@@ -22,10 +22,10 @@ var FRUITS = [
   { id: 'coconut', zone: 'tropical', emoji: '🥥', english: 'Coconut', chinese: '椰子' },
   { id: 'blueberry', zone: 'berry', emoji: '🫐', english: 'Blueberry', chinese: '蓝莓' },
   { id: 'melon', zone: 'common', emoji: '🍈', english: 'Melon', chinese: '甜瓜' },
-  { id: 'plum', zone: 'common', emoji: '🟣', english: 'Plum', chinese: '李子' },
-  { id: 'papaya', zone: 'tropical', emoji: '🟠', english: 'Papaya', chinese: '木瓜' },
+  { id: 'plum', zone: 'common', emoji: '🟣', image: 'images/fruits/plum.svg', english: 'Plum', chinese: '李子' },
+  { id: 'papaya', zone: 'tropical', emoji: '🟠', image: 'images/fruits/papaya.svg', english: 'Papaya', chinese: '木瓜' },
   { id: 'avocado', zone: 'tropical', emoji: '🥑', english: 'Avocado', chinese: '牛油果' },
-  { id: 'pomegranate', zone: 'common', emoji: '🔴', english: 'Pomegranate', chinese: '石榴' }
+  { id: 'pomegranate', zone: 'common', emoji: '🔴', image: 'images/fruits/pomegranate.svg', english: 'Pomegranate', chinese: '石榴' }
 ];
 
 var FRUIT_SENTENCES = {

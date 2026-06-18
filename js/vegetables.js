@@ -22,7 +22,7 @@ var VEGETABLES = [
   { id: 'pepper', zone: 'common', emoji: '🫑', english: 'Pepper', chinese: '甜椒' },
   { id: 'mushroom', zone: 'common', emoji: '🍄', english: 'Mushroom', chinese: '蘑菇' },
   { id: 'celery', zone: 'leafy', emoji: '🌿', english: 'Celery', chinese: '芹菜' },
-  { id: 'radish', zone: 'root', emoji: '🔴', english: 'Radish', chinese: '萝卜' },
+  { id: 'radish', zone: 'root', emoji: '🔴', image: 'images/vegetables/radish.svg', english: 'Radish', chinese: '萝卜' },
   { id: 'pea', zone: 'common', emoji: '🫛', english: 'Pea', chinese: '豌豆' },
   { id: 'bean', zone: 'common', emoji: '🫘', english: 'Bean', chinese: '豆子' },
   { id: 'sweetpotato', zone: 'root', emoji: '🍠', english: 'Sweet Potato', chinese: '红薯' }

@@ -8,7 +8,7 @@ var WordSpeech = (function () {
     'Jenny', 'Aria', 'Zira', 'Samantha', 'Susan', 'Michelle', 'Google US English Female'
   ];
   var EN_MALE_NAMES = ['David', 'Mark', 'Guy', 'James', 'Brian', 'Daniel', 'George'];
-  var ZH_PRIORITY = ['Xiaoxiao', 'Xiaoyi', 'Yunxi', 'Huihui', 'Yaoyao', 'Kangkang'];
+  var TTS_TIMEOUT_MS = 10000;
 
   function loadVoices() {
     if (!speechSynth) return;
@@ -40,18 +40,6 @@ var WordSpeech = (function () {
     return enUs[0] || null;
   }
 
-  function pickVoice(langPrefix, priorities) {
-    var matched = cachedVoices.filter(function (v) {
-      return v.lang.indexOf(langPrefix) === 0;
-    });
-    for (var i = 0; i < priorities.length; i++) {
-      for (var j = 0; j < matched.length; j++) {
-        if (matched[j].name.indexOf(priorities[i]) !== -1) return matched[j];
-      }
-    }
-    return matched[0] || null;
-  }
-
   function stopWordAudio() {
     wordAudio.pause();
     wordAudio.currentTime = 0;
@@ -71,22 +59,39 @@ var WordSpeech = (function () {
     });
   }
 
-  function speakWithSynth(text, lang, voice) {
+  function speakWithSynth(text, lang, voice, rate) {
     return new Promise(function (resolve) {
-      if (!speechSynth) { resolve(); return; }
+      if (!speechSynth || !text) { resolve(); return; }
+      var finished = false;
+      function finish() {
+        if (finished) return;
+        finished = true;
+        resolve();
+      }
+      var timer = setTimeout(finish, TTS_TIMEOUT_MS);
       var utterance = new SpeechSynthesisUtterance(text);
       utterance.lang = lang;
       if (voice) utterance.voice = voice;
-      utterance.rate = lang.indexOf('en') === 0 ? 0.85 : 0.9;
+      utterance.rate = rate || 0.85;
       utterance.pitch = 1.0;
-      utterance.onend = resolve;
-      utterance.onerror = resolve;
+      utterance.onend = function () {
+        clearTimeout(timer);
+        finish();
+      };
+      utterance.onerror = function () {
+        clearTimeout(timer);
+        finish();
+      };
       speechSynth.speak(utterance);
     });
   }
 
   function speakEnglishLocal(id) {
     return playAudioUrl('audio/en/' + id + '.mp3');
+  }
+
+  function speakEnglishSentenceLocal(id) {
+    return playAudioUrl('audio/en/' + id + '-sentence.mp3');
   }
 
   function speakEnglishTTS(word) {
@@ -96,16 +101,9 @@ var WordSpeech = (function () {
       if (!speechSynth) { resolve(); return; }
       speechSynth.cancel();
       setTimeout(function () {
-        speakWithSynth(word, 'en-US', voice).then(resolve);
+        speakWithSynth(word, 'en-US', voice, 0.85).then(resolve);
       }, 100);
     });
-  }
-
-  function speakChinese(text) {
-    if (!text) return Promise.resolve();
-    if (!voicesLoaded) loadVoices();
-    var voice = pickVoice('zh', ZH_PRIORITY);
-    return speakWithSynth(text, 'zh-CN', voice);
   }
 
   function delay(ms) {
@@ -121,14 +119,7 @@ var WordSpeech = (function () {
     return new Promise(function (resolve) {
       if (!speechSynth) { resolve(); return; }
       setTimeout(function () {
-        var utterance = new SpeechSynthesisUtterance(text);
-        utterance.lang = 'en-US';
-        utterance.rate = 0.78;
-        utterance.pitch = 1.0;
-        if (voice) utterance.voice = voice;
-        utterance.onend = resolve;
-        utterance.onerror = resolve;
-        speechSynth.speak(utterance);
+        speakWithSynth(text, 'en-US', voice, 0.78).then(resolve);
       }, 100);
     });
   }
@@ -140,11 +131,9 @@ var WordSpeech = (function () {
     return speakEnglishLocal(id)
       .catch(function () { return speakEnglishTTS(english); })
       .then(function () { return delay(300); })
-      .then(function () { return speakChinese(chinese); })
-      .then(function () { return delay(400); })
-      .then(function () { return speakEnglishSentence(sentenceEn); })
-      .then(function () { return delay(300); })
-      .then(function () { return speakChinese(sentenceZh || ''); });
+      .then(function () {
+        return speakEnglishSentenceLocal(id).catch(function () { return speakEnglishSentence(sentenceEn); });
+      });
   }
 
   return {

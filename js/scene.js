@@ -18,6 +18,10 @@ var SceneApp = (function () {
   }
 
   function getItemIconHtml(item, sizeClass) {
+    var svg = item.svg || (window.ItemIcons && ItemIcons[item.id]);
+    if (svg) {
+      return '<span class="' + sizeClass + ' item-svg" role="img" aria-label="' + item.chinese + '">' + svg + '</span>';
+    }
     if (item.image) {
       return '<img class="' + sizeClass + ' item-img" src="' + item.image + '" alt="' + item.chinese + '">';
     }

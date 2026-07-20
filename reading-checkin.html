@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+  <title>宝贝英语阅读打卡</title>
+  <style>
+    :root {
+      --primary: #5B9BD5;
+      --primary-light: #7EC8E3;
+      --secondary: #FFD966;
+      --bg: #F5F7FA;
+      --card: #FFFFFF;
+      --done: #52C41A;
+      --doing: #1890FF;
+      --todo: #D9D9D9;
+      --text: #333333;
+      --text-muted: #666666;
+      --progress-bg: #E8ECF1;
+      --dot-off: #E0E0E0;
+      --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+      --radius: 16px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Comic Sans MS", "Yuanti SC", "YouYuan", "STYuanti-SC-Regular", "PingFang SC", cursive, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 12px 14px 32px;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    #app { max-width: 480px; margin: 0 auto; position: relative; }
+
+    /* 页面切换淡入淡出 */
+    .page {
+      display: none;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .page.active {
+      display: block;
+      opacity: 1;
+      animation: pageFadeIn 0.3s ease forwards;
+    }
+
+    @keyframes pageFadeIn {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 每日欢迎条 */
+    .daily-banner {
+      background: linear-gradient(135deg, var(--secondary) 0%, #ffe799 100%);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+      line-height: 1.5;
+      animation: pageFadeIn 0.4s ease;
+    }
+
+    .daily-banner.hidden { display: none; }
+
+    /* —— 首页 —— */
+    .home-header {
+      text-align: center;
+      padding: 18px 8px 20px;
+    }
+
+    .home-to-index {
+      display: inline-block;
+      margin-bottom: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--primary);
+      text-decoration: none;
+      background: var(--card);
+      padding: 8px 14px;
+      border-radius: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .home-header h1 {
+      font-size: 1.45rem;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .home-header p {
+      margin-top: 6px;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+    }
+
+    #stage-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .stage-card {
+      display: block;
+      width: 100%;
+      text-align: left;
+      border: none;
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 16px;
+      cursor: pointer;
+      position: relative;
+      transition: transform 0.15s ease;
+    }
+
+    .stage-card:active { transform: scale(0.98); }
+
+    .stage-card.is-locked { opacity: 0.75; }
+
+    .stage-card-top {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .stage-emoji {
+      font-size: 2rem;
+      line-height: 1;
+      flex-shrink: 0;
+    }
+
+    .stage-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      line-height: 1.35;
+    }
+
+    .stage-meta {
+      margin-top: 4px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .stage-status {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      padding: 2px 12px;
+      border-radius: 20px;
+    }
+
+    .stage-status.todo { background: #f0f0f0; color: var(--text-muted); }
+    .stage-status.doing { background: rgba(24, 144, 255, 0.12); color: var(--doing); }
+    .stage-status.done { background: rgba(82, 196, 26, 0.12); color: var(--done); }
+
+    .stage-progress-bar {
+      margin-top: 12px;
+      height: 8px;
+      background: var(--progress-bg);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .stage-progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
+      border-radius: 999px;
+      transition: width 0.5s ease;
+    }
+
+    .stage-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .stage-books-done {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    /* —— 详情页 —— */
+    .detail-day-bar {
+      text-align: center;
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--primary);
+      background: var(--card);
+      border-radius: 12px;
+      padding: 10px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    .detail-nav {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .btn-back {
+      border: none;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      border-radius: 12px;
+      padding: 10px 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .nav-center { min-width: 0; }
+
+    .nav-stage {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-book {
+      font-size: 1rem;
+      font-weight: 700;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* 今日任务卡片 */
+    .today-card {
+      background: #FFF8E1;
+      border: 2px solid var(--secondary);
+      border-radius: var(--radius);
+      padding: 18px 16px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+
+    .today-card.is-done {
+      background: rgba(82, 196, 26, 0.1);
+      border-color: var(--done);
+    }
+
+    .today-card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #b8860b;
+    }
+
+    .today-card.is-done .today-card-title { color: var(--done); }
+
+    .today-card-body {
+      font-size: 1.1rem;
+      line-height: 1.7;
+      font-weight: 600;
+      word-break: break-word;
+    }
+
+    .today-card-done-msg {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--done);
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    /* 6 天圆点 */
+    .dots-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 16px 8px 14px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+    }
+
+    .dots-section-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-align: center;
+      margin-bottom: 14px;
+    }
+
+    .dots-row {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 2px;
+    }
+
+    .dot-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      padding: 4px 2px;
+      min-width: 0;
+      font-family: inherit;
+    }
+
+    .dot-num {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-weight: 600;
+    }
+
+    .dot-circle {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      min-height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      background: var(--dot-off);
+      color: var(--text-muted);
+      transition: background 0.2s ease, transform 0.2s ease;
+    }
+
+    .dot-item.is-today .dot-circle {
+      box-shadow: 0 0 0 3px rgba(91, 155, 213, 0.35);
+      border: 2px solid var(--primary);
+      background: #fff;
+    }
+
+    .dot-item.is-done .dot-circle {
+      background: var(--done);
+      color: #fff;
+      border: none;
+    }
+
+    .dot-item.is-done .dot-circle::after { content: "✓"; font-weight: 700; }
+    .dot-item.is-done .dot-circle { font-size: 0; }
+    .dot-item.is-done .dot-circle::after { font-size: 1rem; }
+
+    .dot-circle.dot-bounce {
+      animation: dotElastic 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes dotElastic {
+      0% { transform: scale(1); }
+      30% { transform: scale(0.7); }
+      70% { transform: scale(1.15); }
+      100% { transform: scale(1); }
+    }
+
+    .dot-label {
+      font-size: 0.65rem;
+      line-height: 1.2;
+      color: var(--text-muted);
+      text-align: center;
+      font-weight: 600;
+    }
+
+    .dot-item.is-done .dot-label { color: var(--done); }
+    .dot-item.is-today .dot-label { color: var(--text); }
+
+    /* 书籍列表 */
+    .book-list-section {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 12px;
+      box-shadow: var(--shadow);
+      margin-bottom: 14px;
+      max-height: 220px;
+      overflow-y: auto;
+    }
+
+    .book-list-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+    }
+
+    .book-card {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+      border-radius: 12px;
+      background: #fafafa;
+      border: none;
+      width: 100%;
+      text-align: left;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s ease;
+    }
+
+    .book-card:last-child { margin-bottom: 0; }
+
+    .book-card.is-viewing {
+      border-left: 4px solid var(--primary);
+      background: rgba(91, 155, 213, 0.12);
+      box-shadow: inset 0 0 0 1px rgba(91, 155, 213, 0.2);
+    }
+
+    .book-card.is-current:not(.is-viewing) {
+      border-left: 4px solid var(--secondary);
+      background: rgba(255, 217, 102, 0.12);
+    }
+
+    .book-card.is-complete { opacity: 0.85; }
+
+    .book-card-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--progress-bg);
+      color: var(--primary);
+      font-size: 0.82rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .book-card.is-viewing .book-card-num {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .book-card.is-current:not(.is-viewing) .book-card-num {
+      background: var(--secondary);
+      color: var(--text);
+    }
+
+    .book-card-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .book-card-name {
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .book-card-meta {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* 快捷操作 */
+    .action-area { margin-bottom: 12px; text-align: center; }
+
+    .btn-checkin {
+      display: block;
+      width: 100%;
+      border: none;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+      color: #fff;
+      font-size: 1.15rem;
+      font-weight: 700;
+      padding: 16px;
+      border-radius: 14px;
+      cursor: pointer;
+      box-shadow: 0 6px 16px rgba(91, 155, 213, 0.4);
+      font-family: inherit;
+    }
+
+    .btn-checkin:active { transform: scale(0.97); }
+
+    .encourage {
+      background: rgba(82, 196, 26, 0.1);
+      border: 1px solid rgba(82, 196, 26, 0.3);
+      border-radius: 14px;
+      padding: 16px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--done);
+    }
+
+    .helper-tip {
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .book-nav {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+
+    .book-nav button {
+      flex: 1;
+      border: none;
+      background: var(--card);
+      box-shadow: var(--shadow);
+      border-radius: 12px;
+      padding: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .book-nav button:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .btn-reset {
+      display: block;
+      width: 100%;
+      border: 1px dashed var(--todo);
+      background: transparent;
+      color: var(--text-muted);
+      border-radius: 12px;
+      padding: 12px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    /* 完成一本书 — 浮动通知 */
+    .toast {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.8);
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px 32px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease, transform 0.3s ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translate(-50%, -50%) scale(1);
+      pointer-events: auto;
+    }
+
+    /* 完成阶段 — 全屏庆祝 */
+    .celebration-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.55);
+      z-index: 2000;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      cursor: pointer;
+    }
+
+    .celebration-overlay.show { display: flex; animation: pageFadeIn 0.3s ease; }
+
+    .celebration-text {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      z-index: 2002;
+    }
+
+    .celebration-hint {
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+      margin-top: 8px;
+      z-index: 2002;
+    }
+
+    .confetti-container {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 2001;
+    }
+
+    .confetti-item {
+      position: absolute;
+      top: -40px;
+      font-size: 1.5rem;
+      animation: confettiFall linear forwards;
+    }
+
+    @keyframes confettiFall {
+      0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0.3; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <!-- 首页 -->
+    <div id="page-home" class="page active">
+      <header class="home-header">
+        <a href="index.html" class="home-to-index">← 返回乐园首页</a>
+        <h1>📚 宝贝英语阅读打卡</h1>
+        <p>按阶段阅读 · 每天一小步</p>
+      </header>
+      <div id="daily-banner" class="daily-banner hidden"></div>
+      <div id="stage-list"></div>
+    </div>
+
+    <!-- 详情页 -->
+    <div id="page-detail" class="page">
+      <div class="detail-day-bar" id="detail-day-bar">📅 第1天 / 共60天</div>
+
+      <nav class="detail-nav">
+        <button type="button" class="btn-back" id="btn-back">← 返回</button>
+        <div class="nav-center">
+          <div class="nav-stage" id="nav-stage">阶段名</div>
+          <div class="nav-book" id="nav-book">当前书名</div>
+        </div>
+      </nav>
+
+      <section class="today-card" id="today-card">
+        <div class="today-card-title" id="today-card-title">📌 今日任务 · 第1天/共6天</div>
+        <div class="today-card-body" id="today-card-body">任务内容</div>
+      </section>
+
+      <section class="dots-section">
+        <div class="dots-section-title">本书 6 天进度</div>
+        <div class="dots-row" id="dots-row"></div>
+      </section>
+
+      <div class="action-area" id="action-area"></div>
+
+      <p class="helper-tip">💡 点击灰色圆点可补打之前的卡</p>
+
+      <section class="book-list-section">
+        <div class="book-list-title">📚 书籍列表</div>
+        <div id="book-list"></div>
+      </section>
+
+      <div class="book-nav">
+        <button type="button" id="btn-prev-book">← 上一本</button>
+        <button type="button" id="btn-next-book">下一本 →</button>
+      </div>
+
+      <button type="button" class="btn-reset" id="btn-reset">重置本阶段打卡</button>
+    </div>
+  </div>
+
+  <!-- 完成一本书通知 -->
+  <div id="toast" class="toast"></div>
+
+  <!-- 完成阶段庆祝 -->
+  <div id="celebration" class="celebration-overlay">
+    <div class="confetti-container" id="confetti-container"></div>
+    <div class="celebration-text" id="celebration-text">🎊 恭喜完成本阶段！</div>
+    <div class="celebration-hint">点击任意处关闭</div>
+  </div>
+
+  <script src="js/reading-checkin.js"></script>
+</body>
+</html>

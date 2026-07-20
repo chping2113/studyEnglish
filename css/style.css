@@ -167,6 +167,31 @@ body {
   border-color: var(--pink);
 }
 
+.category-featured {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: linear-gradient(135deg, #fff8e1 0%, #e3f2fd 100%);
+  border-color: #5B9BD5;
+}
+
+.category-featured .card-icon {
+  font-size: 3rem;
+  margin-bottom: 0;
+}
+
+.category-featured h2 {
+  margin-bottom: 2px;
+}
+
+.category-featured > div:not(.card-icon) {
+  text-align: left;
+}
+
 .category-soon {
   opacity: 0.65;
   cursor: not-allowed;
@@ -355,12 +380,19 @@ body {
   justify-content: center;
 }
 
-.item-img, .animal-img {
+.item-img, .animal-img,
+.item-svg, .animal-svg {
   width: clamp(2rem, 6vw, 2.8rem);
   height: clamp(2rem, 6vw, 2.8rem);
   object-fit: contain;
   filter: drop-shadow(2px 3px 4px rgba(0,0,0,0.15));
   animation: itemIdle 3s ease-in-out infinite;
+}
+
+.item-svg svg, .animal-svg svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 .item-label, .animal-label {
@@ -373,8 +405,10 @@ body {
 
 .scene-item.clicked .item-icon,
 .scene-item.clicked .item-img,
+.scene-item.clicked .item-svg,
 .animal.clicked .animal-icon,
-.animal.clicked .animal-img {
+.animal.clicked .animal-img,
+.animal.clicked .animal-svg {
   animation: itemJump 0.5s ease;
 }
 
@@ -541,6 +575,8 @@ body {
 
 .modal-item-icon .item-img,
 .modal-animal-icon .animal-img,
+.modal-item-icon .item-svg,
+.modal-animal-icon .animal-svg,
 img.modal-item-icon,
 img.modal-animal-icon {
   width: 5rem;
@@ -820,6 +856,20 @@ img.modal-animal-icon {
 
   .card-icon {
     font-size: 2.8rem;
+  }
+
+  .category-featured {
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px 12px;
+  }
+
+  .category-featured .card-icon {
+    font-size: 2.8rem;
+  }
+
+  .category-featured > div:not(.card-icon) {
+    text-align: center;
   }
 
   .top-nav {

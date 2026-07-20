@@ -273,6 +273,8 @@
       line-height: 1.7;
       font-weight: 600;
       word-break: break-word;
+      /* 固定至少 2 行：1.1rem × 1.7 × 2 ≈ 3.74rem；超过 2 行自动增高 */
+      min-height: calc(1.1rem * 1.7 * 2);
     }
 
     .today-card-done-msg {
@@ -280,7 +282,12 @@
       font-weight: 700;
       color: var(--done);
       text-align: center;
-      padding: 8px 0;
+      /* 完成态也占满 2 行区域，垂直居中 */
+      min-height: calc(1.1rem * 1.7 * 2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
     }
 
     /* 6 天圆点 */

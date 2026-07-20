@@ -380,7 +380,15 @@ function checkDailyWelcome() {
   banner.classList.remove("hidden");
 }
 
-function showPage(pageId) {
+function showPage(pageId, { animate = true } = {}) {
+  const page = document.getElementById(pageId);
+  if (!page) return;
+
+  // 已在当前页：不重置透明度，避免打卡时整页闪动
+  if (page.classList.contains("active") && page.style.display !== "none") {
+    return;
+  }
+
   document.querySelectorAll(".page").forEach((el) => {
     el.classList.remove("active");
     if (el.id !== pageId) {
@@ -389,10 +397,13 @@ function showPage(pageId) {
     }
   });
 
-  const page = document.getElementById(pageId);
-  if (!page) return;
-
   page.style.display = "block";
+  if (!animate) {
+    page.classList.add("active");
+    page.style.opacity = "1";
+    return;
+  }
+
   page.style.opacity = "0";
   requestAnimationFrame(() => {
     page.classList.add("active");
@@ -500,7 +511,7 @@ function renderHome() {
   });
 }
 
-function renderBookList(stageId, focusBookIndex, viewIndex) {
+function renderBookList(stageId, focusBookIndex, viewIndex, { scroll = false } = {}) {
   const stage = getStageById(stageId);
   const listEl = document.getElementById("book-list");
   if (!stage || !listEl) return;
@@ -537,17 +548,19 @@ function renderBookList(stageId, focusBookIndex, viewIndex) {
   listEl.querySelectorAll("[data-book-index]").forEach((btn) => {
     btn.addEventListener("click", () => {
       viewBookIndex = Number(btn.dataset.bookIndex);
-      renderDetail(stageId);
+      renderDetail(stageId, { scrollBooks: true });
     });
   });
 
-  const viewingCard = listEl.querySelector(".is-viewing");
-  if (viewingCard) {
-    viewingCard.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  if (scroll) {
+    const viewingCard = listEl.querySelector(".is-viewing");
+    if (viewingCard) {
+      viewingCard.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    }
   }
 }
 
-function renderDetail(stageId) {
+function renderDetail(stageId, { scrollBooks = false } = {}) {
   const stage = getStageById(stageId);
   if (!stage) return;
 
@@ -620,7 +633,7 @@ function renderDetail(stageId) {
       const d = Number(btn.dataset.day);
       animateDotClick(btn.querySelector(".dot-circle"));
       toggleCheck(stageId, b, d);
-      renderDetail(stageId);
+      setTimeout(() => renderDetail(stageId), 180);
     });
   });
 
@@ -641,14 +654,14 @@ function renderDetail(stageId) {
       <button type="button" class="btn-checkin" id="btn-goto-focus" style="margin-top:10px">📖 回到当前进度</button>`;
     document.getElementById("btn-goto-focus").addEventListener("click", () => {
       viewBookIndex = focus.bookIndex;
-      renderDetail(stageId);
+      renderDetail(stageId, { scrollBooks: true });
     });
   }
 
   document.getElementById("btn-prev-book").disabled = bookIndex <= 0;
   document.getElementById("btn-next-book").disabled = bookIndex >= stage.books.length - 1;
 
-  renderBookList(stageId, focus.bookIndex, bookIndex);
+  renderBookList(stageId, focus.bookIndex, bookIndex, { scroll: scrollBooks });
   showPage("page-detail");
 }
 
@@ -659,7 +672,7 @@ function openStage(stageId) {
   }
   const focus = getFocusPosition(stageId);
   viewBookIndex = focus.bookIndex;
-  renderDetail(stageId);
+  renderDetail(stageId, { scrollBooks: true });
 }
 
 function goHome() {
